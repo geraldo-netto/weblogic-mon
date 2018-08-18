@@ -48,7 +48,6 @@ public class WebLogicMon {
 
 	private ObjectName[] getServerRuntimes() throws MalformedObjectNameException, MBeanException,
 			AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException {
-		// (String) getValue(serverMBean[j], "State");
 		ObjectName service = new ObjectName(
 				"com.bea:Name=DomainRuntimeService,Type=weblogic.management.mbeanservers.domainruntime.DomainRuntimeServiceMBean");
 
@@ -58,11 +57,8 @@ public class WebLogicMon {
 	private void getThreadPoolInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
 		for (ObjectName currMBean : serverMBean) {
-			String server = (String) getValue(currMBean, "Name");
-			String host = (String) getValue(currMBean, "ListenAddress");
 			ObjectName threadPoolMBean = (ObjectName) getValue(currMBean, "ThreadPoolRuntime");
-			System.out.println(getDate() + ";" + host + ";" + server + ";"
-					+ getValue(threadPoolMBean, "CompletedRequestCount") + ";"
+			System.out.println(getDate() + ";" + getValue(threadPoolMBean, "CompletedRequestCount") + ";"
 					+ getValue(threadPoolMBean, "ExecuteThreadTotalCount") + ";"
 					+ getValue(threadPoolMBean, "ExecuteThreadIdleCount") + ";"
 					+ getValue(threadPoolMBean, "HoggingThreadCount") + ";"
@@ -75,10 +71,8 @@ public class WebLogicMon {
 	private void getJVMInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
 		for (ObjectName currMBean : serverMBean) {
-			String server = (String) getValue(currMBean, "Name");
-			String host = (String) getValue(currMBean, "ListenAddress");
 			ObjectName jvmMBean = (ObjectName) getValue(currMBean, "JVMRuntime");
-			System.out.println(getDate() + ";" + host + ";" + server + ";" + getValue(jvmMBean, "HeapFreeCurrent") + ";"
+			System.out.println(getDate() + ";" + getValue(jvmMBean, "HeapFreeCurrent") + ";"
 					+ getValue(jvmMBean, "HeapFreePercent") + ";" + getValue(jvmMBean, "HeapSizeCurrent") + ";"
 					+ getValue(jvmMBean, "HeapSizeMax"));
 		}
@@ -87,8 +81,6 @@ public class WebLogicMon {
 	private void getJMSInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
 		for (ObjectName currMBean : serverMBean) {
-			String server = (String) getValue(currMBean, "Name");
-			String host = (String) getValue(currMBean, "ListenAddress");
 			ObjectName jms = (ObjectName) getValue(currMBean, "JMSRuntime");
 			ObjectName[] jmsSrvs = (ObjectName[]) getValue(jms, "JMSServers");
 
@@ -96,12 +88,12 @@ public class WebLogicMon {
 				ObjectName[] destinationsMBean = (ObjectName[]) getValue(currJMSSrv, "Destinations");
 
 				for (ObjectName currDestination : destinationsMBean) {
-					System.out.println(getDate() + ";" + host + ";" + server + ";" + getValue(currJMSSrv, "Name") + ";"
-							+ getValue(currDestination, "Name") + ";"
-							+ getValue(currDestination, "MessagesCurrentCount") + ";"
-							+ getValue(currDestination, "MessagesPendingCount") + ";"
-							+ getValue(currDestination, "MessagesHighCount") + ";"
-							+ getValue(currDestination, "MessagesReceivedCount"));
+					System.out.println(
+							getDate() + ";" + getValue(currJMSSrv, "Name") + ";" + getValue(currDestination, "Name")
+									+ ";" + getValue(currDestination, "MessagesCurrentCount") + ";"
+									+ getValue(currDestination, "MessagesPendingCount") + ";"
+									+ getValue(currDestination, "MessagesHighCount") + ";"
+									+ getValue(currDestination, "MessagesReceivedCount"));
 				}
 			}
 		}
@@ -111,14 +103,12 @@ public class WebLogicMon {
 			InstanceNotFoundException, ReflectionException, IOException, MalformedObjectNameException {
 		for (ObjectName currMBean : serverMBean) {
 			String server = (String) getValue(currMBean, "Name");
-			String host = (String) getValue(currMBean, "ListenAddress");
-
 			ObjectName[] jdbcsMBean = (ObjectName[]) getValue(new ObjectName("com.bea:Name=" + server
 					+ ",ServerRuntime=" + server + ",Location=" + server + ",Type=JDBCServiceRuntime"),
 					"JDBCDataSourceRuntimeMBeans");
 			for (ObjectName currJDBC : jdbcsMBean) {
-				System.out.println(getDate() + ";" + host + ";" + server + ";" + (String) getValue(currJDBC, "Name")
-						+ ";" + getValue(currJDBC, "ActiveConnectionsCurrentCount") + ";"
+				System.out.println(getDate() + ";" + (String) getValue(currJDBC, "Name") + ";"
+						+ getValue(currJDBC, "ActiveConnectionsCurrentCount") + ";"
 						+ getValue(currJDBC, "WaitSecondsHighCount") + ";"
 						+ getValue(currJDBC, "WaitingForConnectionCurrentCount") + ";"
 						+ getValue(currJDBC, "WaitingForConnectionFailureTotal") + ";"
@@ -156,9 +146,6 @@ public class WebLogicMon {
 	private void getEJBInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
 		for (ObjectName currMBean : serverMBean) {
-			String server = (String) getValue(currMBean, "Name");
-			String host = (String) getValue(currMBean, "ListenAddress");
-
 			ObjectName[] appsMBean = (ObjectName[]) getValue(currMBean, "ApplicationRuntimes");
 			for (ObjectName currApp : appsMBean) {
 
@@ -171,11 +158,10 @@ public class WebLogicMon {
 						for (ObjectName currEJB : ejbsMBean) {
 							ObjectName pool = (ObjectName) getValue(currEJB, "PoolRuntime");
 
-							System.out.println(getDate() + ";" + host + ";" + server + ";"
-									+ (String) getValue(currApp, "Name") + ";" + (String) getValue(pool, "Name") + ";"
-									+ getValue(pool, "AccessTotalCount") + ";" + getValue(pool, "MissTotalCount") + ";"
-									+ getValue(pool, "DestroyedTotalCount") + ";"
-									+ getValue(pool, "PooledBeansCurrentCount") + ";"
+							System.out.println(getDate() + ";" + (String) getValue(currApp, "Name") + ";"
+									+ (String) getValue(pool, "Name") + ";" + getValue(pool, "AccessTotalCount") + ";"
+									+ getValue(pool, "MissTotalCount") + ";" + getValue(pool, "DestroyedTotalCount")
+									+ ";" + getValue(pool, "PooledBeansCurrentCount") + ";"
 									+ getValue(pool, "BeansInUseCurrentCount") + ";"
 									+ getValue(pool, "WaiterCurrentCount") + ";" + getValue(pool, "TimeoutTotalCount"));
 						}
@@ -188,15 +174,12 @@ public class WebLogicMon {
 	private void getWebInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
 		for (ObjectName currMBean : serverMBean) {
-			String server = (String) getValue(currMBean, "Name");
-			String host = (String) getValue(currMBean, "ListenAddress");
-
 			ObjectName[] appsMBean = (ObjectName[]) getValue(currMBean, "ApplicationRuntimes");
 			for (ObjectName currApp : appsMBean) {
 				ObjectName[] workManagersMBean = (ObjectName[]) getValue(currApp, "WorkManagerRuntimes");
 				for (ObjectName currWorkMan : workManagersMBean) {
-					System.out.println(getDate() + ";" + host + ";" + server + ";" + (String) getValue(currApp, "Name")
-							+ ";" + (String) getValue(currWorkMan, "Name") + ";"
+					System.out.println(getDate() + ";" + (String) getValue(currApp, "Name") + ";"
+							+ (String) getValue(currWorkMan, "Name") + ";"
 							+ Integer.parseInt((String) getValue(currWorkMan, "PendingRequests")) + ";"
 							+ Integer.parseInt((String) getValue(currWorkMan, "CompletedRequests")) + ";"
 							+ Integer.parseInt((String) getValue(currWorkMan, "StuckThreadCount")));
@@ -207,8 +190,7 @@ public class WebLogicMon {
 					String type = (String) getValue(currComponent, "Type");
 
 					if ("WebAppComponentRuntime".equals(type)) {
-						System.out.println(getDate() + ";" + host + ";" + server + ";"
-								+ (String) getValue(currApp, "Name") + ";"
+						System.out.println(getDate() + (String) getValue(currApp, "Name") + ";"
 								+ (String) getValue(currComponent, "ComponentName") + ";"
 								+ Integer.parseInt((String) getValue(currComponent, "OpenSessionsCurrentCount")) + ";"
 								+ Integer.parseInt((String) getValue(currComponent, "SessionsOpenedTotalCount")));
@@ -221,12 +203,10 @@ public class WebLogicMon {
 	private void getClusterInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
 		for (ObjectName currMBean : serverMBean) {
-			String server = (String) getValue(currMBean, "Name");
-			String host = (String) getValue(currMBean, "ListenAddress");
 			ObjectName clusterMBean = (ObjectName) getValue(currMBean, "ClusterRuntime");
 			if (clusterMBean != null) {
-				System.out.println(getDate() + ";" + host + ";" + server + ";" + (String) getValue(clusterMBean, "Name")
-						+ ";" + Integer.parseInt((String) getValue(clusterMBean, "ResendRequestsCount")) + ";"
+				System.out.println(getDate() + ";" + (String) getValue(clusterMBean, "Name") + ";"
+						+ Integer.parseInt((String) getValue(clusterMBean, "ResendRequestsCount")) + ";"
 						+ Integer.parseInt((String) getValue(clusterMBean, "ForeignFragmentsDroppedCount")) + ";"
 						+ Integer.parseInt((String) getValue(clusterMBean, "FragmentsReceivedCount")) + ";"
 						+ Integer.parseInt((String) getValue(clusterMBean, "FragmentsSentCount")) + ";"
@@ -256,6 +236,11 @@ public class WebLogicMon {
 		String user = args[2];
 		String password = args[3];
 
+		/*
+		 * server = (String) getValue(currMBean, "Name"); host = (String)
+		 * getValue(currMBean, "ListenAddress"); state = (String)
+		 * getValue(serverMBean[j], "State");
+		 */
 		WebLogicMon webLogicMon = new WebLogicMon(address, port, user, password);
 		ObjectName[] serverMBean = webLogicMon.getServerRuntimes();
 		webLogicMon.getThreadPoolInfo(serverMBean);
