@@ -1,11 +1,11 @@
 # WebLogic Monitor
 
-WebLogic Monitor allows to monitor WebLogic internal counters like thread count, hogging threads, etc
-Work in progress
+ WebLogic Monitor allows to monitor WebLogic internal counters like thread count, hogging threads, etc
+ Work in progress
 
 ## Compilation
 
-We assume you have [java](http://openjdk.java.net/) and [maven](https://maven.apache.org/) installed
+ We assume you have [java](http://openjdk.java.net/) and [maven](https://maven.apache.org/) installed
 
 ```console
 netto@morpheus:~ $ mvn package
@@ -53,14 +53,14 @@ netto@morpheus:~ $ java WebLogicMon.jar ${HOST} ${PORT} ${USER} ${PASSWORD}
 ```
 
 ## TODO
-cleanup code
-replace hardcoded mbeans by one dynamic plugin-like architecture
+ cleanup code
+ replace hardcoded mbeans by one dynamic plugin-like architecture
 
 ## License
-[MIT](https://opensource.org/licenses/MIT)
+ [MIT](https://opensource.org/licenses/MIT)
 
 ## References
-[Getting WebLogic DataSource Properties Using JMX](http://middlewaremagic.com/weblogic/?p=50)
-[Oracle Fusion Middleware Oracle WebLogic Server MBean Reference 11g Release 1 (10.3.5)](https://docs.oracle.com/cd/E24001_01/apirefs.1111/e13951/core/index.html)
-[WebLogic Server MBean Reference](http://docs.oracle.com/cd/E12840_01/wls/docs103/wlsmbeanref/core/index.html)
-[WebLogic Stuck Threads: Creating, Understanding and Dealing with them](http://www.munzandmore.com/2012/ora/weblogic-stuck-threads-howto)
+ [Getting WebLogic DataSource Properties Using JMX](http://middlewaremagic.com/weblogic/?p=50)
+ [Oracle Fusion Middleware Oracle WebLogic Server MBean Reference 11g Release 1 (10.3.5)](https://docs.oracle.com/cd/E24001_01/apirefs.1111/e13951/core/index.html)
+ [WebLogic Server MBean Reference](http://docs.oracle.com/cd/E12840_01/wls/docs103/wlsmbeanref/core/index.html)
+ [WebLogic Stuck Threads: Creating, Understanding and Dealing with them](http://www.munzandmore.com/2012/ora/weblogic-stuck-threads-howto)
