@@ -48,7 +48,7 @@ public class WebLogicMon {
 
 	private ObjectName[] getServerRuntimes() throws MalformedObjectNameException, MBeanException,
 			AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException {
-		// (String) getValue(arrayOfObjectName[j], "State");
+		// (String) getValue(serverMBean[j], "State");
 		ObjectName service = new ObjectName(
 				"com.bea:Name=DomainRuntimeService,Type=weblogic.management.mbeanservers.domainruntime.DomainRuntimeServiceMBean");
 
@@ -57,44 +57,46 @@ public class WebLogicMon {
 
 	private void getThreadPoolInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
-		for (ObjectName currObject : serverMBean) {
-			String str = (String) getValue(currObject, "Name");
-			String host = (String) getValue(currObject, "ListenAddress");
-			ObjectName threadPool = (ObjectName) getValue(currObject, "ThreadPoolRuntime");
-			System.out.println(getDate() + ";" + host + ";" + str + ";" + getValue(threadPool, "CompletedRequestCount")
-					+ ";" + getValue(threadPool, "ExecuteThreadTotalCount") + ";"
-					+ getValue(threadPool, "ExecuteThreadIdleCount") + ";" + getValue(threadPool, "HoggingThreadCount")
-					+ ";" + getValue(threadPool, "PendingUserRequestCount") + ";" + getValue(threadPool, "QueueLength")
-					+ ";" + getValue(threadPool, "StandbyThreadCount") + ";" + getValue(threadPool, "Throughput"));
+		for (ObjectName currMBean : serverMBean) {
+			String server = (String) getValue(currMBean, "Name");
+			String host = (String) getValue(currMBean, "ListenAddress");
+			ObjectName threadPoolMBean = (ObjectName) getValue(currMBean, "ThreadPoolRuntime");
+			System.out.println(getDate() + ";" + host + ";" + server + ";"
+					+ getValue(threadPoolMBean, "CompletedRequestCount") + ";"
+					+ getValue(threadPoolMBean, "ExecuteThreadTotalCount") + ";"
+					+ getValue(threadPoolMBean, "ExecuteThreadIdleCount") + ";"
+					+ getValue(threadPoolMBean, "HoggingThreadCount") + ";"
+					+ getValue(threadPoolMBean, "PendingUserRequestCount") + ";"
+					+ getValue(threadPoolMBean, "QueueLength") + ";" + getValue(threadPoolMBean, "StandbyThreadCount")
+					+ ";" + getValue(threadPoolMBean, "Throughput"));
 		}
 	}
 
 	private void getJVMInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
-		for (ObjectName currObject : serverMBean) {
-			String str = (String) getValue(currObject, "Name");
-			String host = (String) getValue(currObject, "ListenAddress");
-			ObjectName jvmRT = (ObjectName) getValue(currObject, "JVMRuntime");
-			System.out.println(getDate() + ";" + host + ";" + str + ";" + getValue(jvmRT, "HeapFreeCurrent") + ";"
-					+ getValue(jvmRT, "HeapFreePercent") + ";" + getValue(jvmRT, "HeapSizeCurrent") + ";"
-					+ getValue(jvmRT, "HeapSizeMax"));
+		for (ObjectName currMBean : serverMBean) {
+			String server = (String) getValue(currMBean, "Name");
+			String host = (String) getValue(currMBean, "ListenAddress");
+			ObjectName jvmMBean = (ObjectName) getValue(currMBean, "JVMRuntime");
+			System.out.println(getDate() + ";" + host + ";" + server + ";" + getValue(jvmMBean, "HeapFreeCurrent") + ";"
+					+ getValue(jvmMBean, "HeapFreePercent") + ";" + getValue(jvmMBean, "HeapSizeCurrent") + ";"
+					+ getValue(jvmMBean, "HeapSizeMax"));
 		}
 	}
 
 	private void getJMSInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
+		for (ObjectName currMBean : serverMBean) {
+			String server = (String) getValue(currMBean, "Name");
+			String host = (String) getValue(currMBean, "ListenAddress");
+			ObjectName jms = (ObjectName) getValue(currMBean, "JMSRuntime");
+			ObjectName[] jmsSrvs = (ObjectName[]) getValue(jms, "JMSServers");
 
-		for (ObjectName currObject : serverMBean) {
-			String str = (String) getValue(currObject, "Name");
-			String host = (String) getValue(currObject, "ListenAddress");
-			ObjectName jmsRT = (ObjectName) getValue(currObject, "JMSRuntime");
-			ObjectName[] jmsSrv = (ObjectName[]) getValue(jmsRT, "JMSServers");
+			for (ObjectName currJMSSrv : jmsSrvs) {
+				ObjectName[] destinationsMBean = (ObjectName[]) getValue(currJMSSrv, "Destinations");
 
-			for (ObjectName currJMSSrv : jmsSrv) {
-				ObjectName[] destinations = (ObjectName[]) getValue(currJMSSrv, "Destinations");
-
-				for (ObjectName currDestination : destinations) {
-					System.out.println(getDate() + ";" + host + ";" + str + ";" + getValue(currJMSSrv, "Name") + ";"
+				for (ObjectName currDestination : destinationsMBean) {
+					System.out.println(getDate() + ";" + host + ";" + server + ";" + getValue(currJMSSrv, "Name") + ";"
 							+ getValue(currDestination, "Name") + ";"
 							+ getValue(currDestination, "MessagesCurrentCount") + ";"
 							+ getValue(currDestination, "MessagesPendingCount") + ";"
@@ -107,52 +109,43 @@ public class WebLogicMon {
 
 	private void getJDBCInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException, MalformedObjectNameException {
-		int i = serverMBean.length;
-		for (int j = 0; j < i; j++) {
-			String str = (String) getValue(serverMBean[j], "Name");
-			ObjectName[] arrayOfObjectName2 = (ObjectName[]) getValue(new ObjectName(
-					"com.bea:Name=" + str + ",ServerRuntime=" + str + ",Location=" + str + ",Type=JDBCServiceRuntime"),
+		for (ObjectName currMBean : serverMBean) {
+			String server = (String) getValue(currMBean, "Name");
+			String host = (String) getValue(currMBean, "ListenAddress");
+
+			ObjectName[] jdbcsMBean = (ObjectName[]) getValue(new ObjectName("com.bea:Name=" + server
+					+ ",ServerRuntime=" + server + ",Location=" + server + ",Type=JDBCServiceRuntime"),
 					"JDBCDataSourceRuntimeMBeans");
-			String host = (String) getValue(serverMBean[j], "ListenAddress");
-			int k = arrayOfObjectName2.length;
-			for (int m = 0; m < k; m++) {
-				System.out.println(
-						getDate() + ";" + host + ";" + str + ";" + (String) getValue(arrayOfObjectName2[m], "Name")
-								+ ";" + getValue(arrayOfObjectName2[m], "ActiveConnectionsCurrentCount") + ";"
-								+ getValue(arrayOfObjectName2[m], "WaitSecondsHighCount") + ";"
-								+ getValue(arrayOfObjectName2[m], "WaitingForConnectionCurrentCount") + ";"
-								+ getValue(arrayOfObjectName2[m], "WaitingForConnectionFailureTotal") + ";"
-								+ getValue(arrayOfObjectName2[m], "WaitingForConnectionTotal") + ";"
-								+ getValue(arrayOfObjectName2[m], "WaitingForConnectionHighCount"));
+			for (ObjectName currJDBC : jdbcsMBean) {
+				System.out.println(getDate() + ";" + host + ";" + server + ";" + (String) getValue(currJDBC, "Name")
+						+ ";" + getValue(currJDBC, "ActiveConnectionsCurrentCount") + ";"
+						+ getValue(currJDBC, "WaitSecondsHighCount") + ";"
+						+ getValue(currJDBC, "WaitingForConnectionCurrentCount") + ";"
+						+ getValue(currJDBC, "WaitingForConnectionFailureTotal") + ";"
+						+ getValue(currJDBC, "WaitingForConnectionTotal") + ";"
+						+ getValue(currJDBC, "WaitingForConnectionHighCount"));
 			}
 		}
 	}
 
 	private void getServletInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
-		int i = serverMBean.length;
-		for (int j = 0; j < i; j++) {
-			// String str1 = (String) getValue(arrayOfObjectName1[j],"Name");
-			// String host = (String) getValue(arrayOfObjectName1[j],"ListenAddress");
-			ObjectName[] arrayOfObjectName2 = (ObjectName[]) getValue(serverMBean[j], "ApplicationRuntimes");
+		for (ObjectName currMBean : serverMBean) {
+			ObjectName[] appsMBean = (ObjectName[]) getValue(currMBean, "ApplicationRuntimes");
+			for (ObjectName currApp : appsMBean) {
+				System.out.println("Application name: " + (String) getValue(currApp, "Name"));
 
-			int k = arrayOfObjectName2.length;
-			for (int m = 0; m < k; m++) {
-				System.out.println("Application name: " + (String) getValue(arrayOfObjectName2[m], "Name"));
-				ObjectName[] arrayOfObjectName3 = (ObjectName[]) getValue(arrayOfObjectName2[m], "ComponentRuntimes");
-				int n = arrayOfObjectName3.length;
-				for (int i1 = 0; i1 < n; i1++) {
-					System.out.println("Component name: " + (String) getValue(arrayOfObjectName3[i1], "Name"));
-					String str2 = (String) getValue(arrayOfObjectName3[i1], "Type");
-					if ("WebAppComponentRuntime".equals(str2)) {
-						ObjectName[] arrayOfObjectName4 = (ObjectName[]) getValue(arrayOfObjectName3[i1], "Servlets");
-						int i2 = arrayOfObjectName4.length;
-						for (int i3 = 0; i3 < i2; i3++) {
-							System.out.println("Servlet name: " + (String) getValue(arrayOfObjectName4[i3], "Name"));
-							System.out.println("Servlet context path: "
-									+ (String) getValue(arrayOfObjectName4[i3], "ContextPath"));
-							System.out.println("Invocation Total Count : "
-									+ getValue(arrayOfObjectName4[i3], "InvocationTotalCount"));
+				ObjectName[] componentsMBean = (ObjectName[]) getValue(currApp, "ComponentRuntimes");
+				for (ObjectName currComponent : componentsMBean) {
+					System.out.println("Component: " + (String) getValue(currComponent, "Name"));
+
+					String type = (String) getValue(currComponent, "Type");
+					if ("WebAppComponentRuntime".equals(type)) {
+						ObjectName[] servletsMBean = (ObjectName[]) getValue(currComponent, "Servlets");
+						for (ObjectName currServlet : servletsMBean) {
+							System.out.println("Servlet: " + (String) getValue(currServlet, "Name"));
+							System.out.println("Servlet path: " + (String) getValue(currServlet, "ContextPath"));
+							System.out.println("Invocation Count: " + getValue(currServlet, "InvocationTotalCount"));
 						}
 					}
 				}
@@ -162,35 +155,29 @@ public class WebLogicMon {
 
 	private void getEJBInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
-		int i = serverMBean.length;
-		for (int j = 0; j < i; j++) {
-			String str1 = (String) getValue(serverMBean[j], "Name");
-			ObjectName[] arrayOfObjectName2 = (ObjectName[]) getValue(serverMBean[j], "ApplicationRuntimes");
-			String host = (String) getValue(serverMBean[j], "ListenAddress");
-			int k = arrayOfObjectName2.length;
-			for (int m = 0; m < k; m++) {
-				ObjectName[] arrayOfObjectName3 = (ObjectName[]) getValue(arrayOfObjectName2[m], "ComponentRuntimes");
-				int n = arrayOfObjectName3.length;
-				for (int i1 = 0; i1 < n; i1++) {
-					String str2 = (String) getValue(arrayOfObjectName3[i1], "Type");
+		for (ObjectName currMBean : serverMBean) {
+			String server = (String) getValue(currMBean, "Name");
+			String host = (String) getValue(currMBean, "ListenAddress");
 
-					if ("EJBComponentRuntime".equals(str2)) {
-						ObjectName[] arrayOfObjectName4 = (ObjectName[]) getValue(arrayOfObjectName3[i1],
-								"EJBRuntimes");
-						int i2 = arrayOfObjectName4.length;
-						for (int i3 = 0; i3 < i2; i3++) {
-							ObjectName localObjectName = (ObjectName) getValue(arrayOfObjectName4[i3], "PoolRuntime");
+			ObjectName[] appsMBean = (ObjectName[]) getValue(currMBean, "ApplicationRuntimes");
+			for (ObjectName currApp : appsMBean) {
 
-							System.out.println(getDate() + ";" + host + ";" + str1 + ";"
-									+ (String) getValue(arrayOfObjectName2[m], "Name") + ";"
-									+ (String) getValue(localObjectName, "Name") + ";"
-									+ getValue(localObjectName, "AccessTotalCount") + ";"
-									+ getValue(localObjectName, "MissTotalCount") + ";"
-									+ getValue(localObjectName, "DestroyedTotalCount") + ";"
-									+ getValue(localObjectName, "PooledBeansCurrentCount") + ";"
-									+ getValue(localObjectName, "BeansInUseCurrentCount") + ";"
-									+ getValue(localObjectName, "WaiterCurrentCount") + ";"
-									+ getValue(localObjectName, "TimeoutTotalCount"));
+				ObjectName[] componentsMBean = (ObjectName[]) getValue(currApp, "ComponentRuntimes");
+				for (ObjectName currComponent : componentsMBean) {
+					String type = (String) getValue(currComponent, "Type");
+
+					if ("EJBComponentRuntime".equals(type)) {
+						ObjectName[] ejbsMBean = (ObjectName[]) getValue(currComponent, "EJBRuntimes");
+						for (ObjectName currEJB : ejbsMBean) {
+							ObjectName pool = (ObjectName) getValue(currEJB, "PoolRuntime");
+
+							System.out.println(getDate() + ";" + host + ";" + server + ";"
+									+ (String) getValue(currApp, "Name") + ";" + (String) getValue(pool, "Name") + ";"
+									+ getValue(pool, "AccessTotalCount") + ";" + getValue(pool, "MissTotalCount") + ";"
+									+ getValue(pool, "DestroyedTotalCount") + ";"
+									+ getValue(pool, "PooledBeansCurrentCount") + ";"
+									+ getValue(pool, "BeansInUseCurrentCount") + ";"
+									+ getValue(pool, "WaiterCurrentCount") + ";" + getValue(pool, "TimeoutTotalCount"));
 						}
 					}
 				}
@@ -200,39 +187,31 @@ public class WebLogicMon {
 
 	private void getWebInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
-		int i = serverMBean.length;
+		for (ObjectName currMBean : serverMBean) {
+			String server = (String) getValue(currMBean, "Name");
+			String host = (String) getValue(currMBean, "ListenAddress");
 
-		for (int j = 0; j < i; j++) {
-			String str1 = (String) getValue(serverMBean[j], "Name");
-			ObjectName[] arrayOfObjectName2 = (ObjectName[]) getValue(serverMBean[j], "ApplicationRuntimes");
-			String host = (String) getValue(serverMBean[j], "ListenAddress");
-			int k = arrayOfObjectName2.length;
-			for (int m = 0; m < k; m++) {
-				ObjectName[] arrayOfObjectName3 = (ObjectName[]) getValue(arrayOfObjectName2[m], "WorkManagerRuntimes");
-
-				int n = arrayOfObjectName3.length;
-				for (int i1 = 0; i1 < n; i1++) {
-					System.out.println(getDate() + ";" + host + ";" + str1 + ";"
-							+ (String) getValue(arrayOfObjectName2[m], "Name") + ";"
-							+ (String) getValue(arrayOfObjectName3[i1], "Name") + ";"
-							+ Integer.parseInt((String) getValue(arrayOfObjectName3[i1], "PendingRequests")) + ";"
-							+ Integer.parseInt((String) getValue(arrayOfObjectName3[i1], "CompletedRequests")) + ";"
-							+ Integer.parseInt((String) getValue(arrayOfObjectName3[i1], "StuckThreadCount")));
+			ObjectName[] appsMBean = (ObjectName[]) getValue(currMBean, "ApplicationRuntimes");
+			for (ObjectName currApp : appsMBean) {
+				ObjectName[] workManagersMBean = (ObjectName[]) getValue(currApp, "WorkManagerRuntimes");
+				for (ObjectName currWorkMan : workManagersMBean) {
+					System.out.println(getDate() + ";" + host + ";" + server + ";" + (String) getValue(currApp, "Name")
+							+ ";" + (String) getValue(currWorkMan, "Name") + ";"
+							+ Integer.parseInt((String) getValue(currWorkMan, "PendingRequests")) + ";"
+							+ Integer.parseInt((String) getValue(currWorkMan, "CompletedRequests")) + ";"
+							+ Integer.parseInt((String) getValue(currWorkMan, "StuckThreadCount")));
 				}
 
-				ObjectName[] arrayOfObjectName4 = (ObjectName[]) getValue(arrayOfObjectName2[m], "ComponentRuntimes");
-				n = arrayOfObjectName4.length;
-				for (int i2 = 0; i2 < n; i2++) {
-					String str2 = (String) getValue(arrayOfObjectName4[i2], "Type");
+				ObjectName[] componentsMBean = (ObjectName[]) getValue(currApp, "ComponentRuntimes");
+				for (ObjectName currComponent : componentsMBean) {
+					String type = (String) getValue(currComponent, "Type");
 
-					if ("WebAppComponentRuntime".equals(str2)) {
-						System.out.println(getDate() + ";" + host + ";" + str1 + ";"
-								+ (String) getValue(arrayOfObjectName2[m], "Name") + ";"
-								+ (String) getValue(arrayOfObjectName4[i2], "ComponentName") + ";"
-								+ Integer
-										.parseInt((String) getValue(arrayOfObjectName4[i2], "OpenSessionsCurrentCount"))
-								+ ";" + Integer.parseInt(
-										(String) getValue(arrayOfObjectName4[i2], "SessionsOpenedTotalCount")));
+					if ("WebAppComponentRuntime".equals(type)) {
+						System.out.println(getDate() + ";" + host + ";" + server + ";"
+								+ (String) getValue(currApp, "Name") + ";"
+								+ (String) getValue(currComponent, "ComponentName") + ";"
+								+ Integer.parseInt((String) getValue(currComponent, "OpenSessionsCurrentCount")) + ";"
+								+ Integer.parseInt((String) getValue(currComponent, "SessionsOpenedTotalCount")));
 					}
 				}
 			}
@@ -241,18 +220,17 @@ public class WebLogicMon {
 
 	private void getClusterInfo(ObjectName[] serverMBean) throws MBeanException, AttributeNotFoundException,
 			InstanceNotFoundException, ReflectionException, IOException {
-		for (ObjectName localObjectName1 : serverMBean) {
-			String str = (String) getValue(localObjectName1, "Name");
-			String host = (String) getValue(localObjectName1, "ListenAddress");
-			ObjectName localObjectName2 = (ObjectName) getValue(localObjectName1, "ClusterRuntime");
-			if (localObjectName2 != null) {
-				System.out.println(
-						getDate() + ";" + host + ";" + str + ";" + (String) getValue(localObjectName2, "Name") + ";"
-								+ Integer.parseInt((String) getValue(localObjectName2, "ResendRequestsCount")) + ";"
-								+ Integer.parseInt((String) getValue(localObjectName2, "ForeignFragmentsDroppedCount"))
-								+ ";" + Integer.parseInt((String) getValue(localObjectName2, "FragmentsReceivedCount"))
-								+ ";" + Integer.parseInt((String) getValue(localObjectName2, "FragmentsSentCount"))
-								+ ";" + getValue(localObjectName2, "MulticastMessagesLostCount"));
+		for (ObjectName currMBean : serverMBean) {
+			String server = (String) getValue(currMBean, "Name");
+			String host = (String) getValue(currMBean, "ListenAddress");
+			ObjectName clusterMBean = (ObjectName) getValue(currMBean, "ClusterRuntime");
+			if (clusterMBean != null) {
+				System.out.println(getDate() + ";" + host + ";" + server + ";" + (String) getValue(clusterMBean, "Name")
+						+ ";" + Integer.parseInt((String) getValue(clusterMBean, "ResendRequestsCount")) + ";"
+						+ Integer.parseInt((String) getValue(clusterMBean, "ForeignFragmentsDroppedCount")) + ";"
+						+ Integer.parseInt((String) getValue(clusterMBean, "FragmentsReceivedCount")) + ";"
+						+ Integer.parseInt((String) getValue(clusterMBean, "FragmentsSentCount")) + ";"
+						+ getValue(clusterMBean, "MulticastMessagesLostCount"));
 			}
 		}
 	}
